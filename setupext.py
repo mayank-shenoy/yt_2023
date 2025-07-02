@@ -15,9 +15,10 @@ from distutils.sysconfig import customize_compiler
 from subprocess import PIPE, Popen
 from sys import platform as _platform
 
-from pkg_resources import resource_filename
+from importlib.resources import files
 from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools.command.sdist import sdist as _sdist
+
 
 
 @contextlib.contextmanager
@@ -204,7 +205,7 @@ def check_for_pyembree(std_libs):
     embree_libs = []
     embree_aliases = {}
     try:
-        _ = resource_filename("pyembree", "rtcore.pxd")
+        _ = os.fspath(files("pyembree").joinpath("rtcore.pxd"))
     except ImportError:
         return embree_libs, embree_aliases
 

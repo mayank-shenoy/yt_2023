@@ -2,8 +2,9 @@ import glob
 import os
 from collections import defaultdict
 from distutils.ccompiler import get_default_compiler
-
-from setuptools import Distribution, setup
+import numpy
+from Cython.Build import cythonize
+from setuptools import Distribution, setup, Extension
 
 from setupext import (
     check_CPP14_flags,
@@ -41,7 +42,7 @@ CPP03_FLAG = CPP03_CONFIG[_COMPILER]
 
 cythonize_aliases = {
     "LIB_DIR": "yt/utilities/lib/",
-    "LIB_DIR_EWAH": ["yt/utilities/lib/", "yt/utilities/lib/ewahboolarray/"],
+    "LIB_DIR_EWAH": ["yt/utilities/lib/", "yt/utilities/lib/ewahboolarray/", "yt/utilities/lib/ewah/"],
     "LIB_DIR_GEOM": ["yt/utilities/lib/", "yt/geometry/"],
     "LIB_DIR_GEOM_ARTIO": [
         "yt/utilities/lib/",
@@ -56,8 +57,13 @@ cythonize_aliases = {
     "CPP03_FLAG": CPP03_FLAG,
 }
 
-lib_exts = [
-    "yt/geometry/*.pyx",
+geometry_files = [
+    f for f in glob.glob("yt/geometry/*.pyx")
+    if not f.endswith("particle_oct_container.pyx")
+]
+
+lib_exts = geometry_files + [
+    ("yt/geometry/particle_oct_container.pyx", "LIB_DIR_EWAH"),
     "yt/utilities/cython_fortran_utils.pyx",
     "yt/frontends/ramses/io_utils.pyx",
     "yt/utilities/lib/cykdtree/kdtree.pyx",
@@ -65,6 +71,17 @@ lib_exts = [
     "yt/frontends/artio/_artio_caller.pyx",
     "yt/utilities/lib/*.pyx",
 ]
+
+#ext_ewah = Extension(
+#    name="yt.geometry.particle_oct_container",
+#    sources=["yt/geometry/particle_oct_container.pyx"],
+#    include_dirs=[
+#        "yt/utilities/lib/",          # base includes
+#        "yt/utilities/lib/ewah/",     # where ewah.h is
+#        numpy.get_include()           # numpy headers
+#    ],
+#    language="c++"
+#)
 
 embree_libs, embree_aliases = check_for_pyembree(std_libs)
 cythonize_aliases.update(embree_aliases)

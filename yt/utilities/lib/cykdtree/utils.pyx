@@ -2,7 +2,7 @@
 # distutils: sources = yt/utilities/lib/cykdtree/c_utils.cpp
 # distutils: depends = yt/utilities/lib/cykdtree/c_utils.hpp
 # distutils: language = c++
-# distutils: extra_compile_args = CPP11_FLAG
+# distutils: extra_compile_args = -std=c++14
 import numpy as np
 
 cimport numpy as np
